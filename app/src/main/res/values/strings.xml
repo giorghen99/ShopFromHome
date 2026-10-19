@@ -1,0 +1,17 @@
+ <resources>
+     <string name="app_name">ShopFromHome</string>
+     <string name="open">Apri menu</string>
+     <string name="close">Chiudi menu</string>
+     <string name="profile_image">profile_immage</string>
+     <string name="welcome_message_logged_in">Benvenuto, %1$s!</string>
+     <string name="welcome_message_guest">Benvenuto!</string>
+     <string name="discover_offers">Scopri le nostre offerte esclusive!</string>
+     <string name="register_or_login">Registrati o accedi per un\'esperienza personalizzata!</string>
+      <string name="navigation_drawer_open">Apri menu</string>
+      <string name="navigation_drawer_close">Chiudi menu</string>
+     <string-array name="stati_ordine">
+         <item>IN_LAVORAZIONE</item>
+         <item>PRONTO</item>
+         <item>RITIRATO</item>
+     </string-array>
+ </resources>

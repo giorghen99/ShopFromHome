@@ -1,0 +1,60 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/imageProductDetails"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/textProductNameDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Product Name"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textProductPriceDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="€ 0.00"
+            android:textSize="18sp"
+            android:textColor="#FF5722"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textProductDescriptionDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Description"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textProductCategoryDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Categoria: "
+            android:layout_marginTop="8dp" />
+
+        <!-- Aggiunto elemento per la disponibilità -->
+        <TextView
+            android:id="@+id/textProductAvailabilityDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Disponibilità: "
+            android:layout_marginTop="8dp"
+            android:textStyle="italic" />
+
+    </LinearLayout>
+</ScrollView>

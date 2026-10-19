@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Barra di caricamento -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center" />
+
+    <!-- Informazioni utente -->
+    <TextView
+        android:id="@+id/textViewNomeUtente"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nome Utente"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingTop="8dp" />
+
+    <TextView
+        android:id="@+id/textViewCognomeUtente"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cognome Utente"
+        android:textSize="18sp"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/textViewIdOrdine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ordine ID"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="16dp" />
+
+    <!-- RecyclerView per la lista prodotti -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewProdotti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Spinner per selezionare lo stato dell'ordine -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stato Ordine:"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <Spinner
+        android:id="@+id/spinnerStatoOrdine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Pulsante per aggiornare lo stato -->
+    <Button
+        android:id="@+id/btnAggiornaStato"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aggiorna Stato"
+        android:backgroundTint="@color/teal_700"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:padding="12dp" />
+</LinearLayout>

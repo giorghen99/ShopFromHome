@@ -1,0 +1,79 @@
+// Definisci il buildscript prima dei plugin
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.4.0' // Assicurati che sia l'ultima versione
+    }
+}
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.shopfromhome'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.shopfromhome"
+        minSdk 27
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation libs.recyclerview
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+
+    dependencies {
+        // Retrofit
+        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+        // Gson converter for Retrofit
+        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+        // OkHttp (opzionale, per il logging delle richieste HTTP)
+        implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+
+        implementation 'com.google.android.material:compose-theme-adapter:1.0.0'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+        implementation 'androidx.recyclerview:recyclerview:1.2.1'
+        implementation 'androidx.cardview:cardview:1.0.0'
+
+    }
+
+    // Aggiungi le librerie per la gestione delle dipendenze
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2' // Per l'architettura MVVM (se usata)
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2' // Per ViewModel
+
+    // Opzionale: aggiungi le librerie per la gestione delle coroutine
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+}

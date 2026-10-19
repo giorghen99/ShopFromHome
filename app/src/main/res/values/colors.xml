@@ -1,0 +1,27 @@
+<resources>
+    <!-- Colori principali dell'app -->
+    <color name="colorPrimary">#58B76E</color> <!-- Verde naturale, fresco, associato alla salute e freschezza -->
+    <color name="colorPrimaryDark">#3B8A4A</color> <!-- Verde più scuro, per la barra superiore, coerente con il colore primario -->
+    <color name="colorAccent">#FFB74D</color> <!-- Arancione morbido, per dare un tocco di calore e vivacità -->
+
+    <!-- Colori per il toolbar e background -->
+    <color name="toolbarBackground">#58B76E</color> <!-- Verde naturale per il toolbar -->
+    <color name="drawerBackgroundColor">#FFFFFF</color> <!-- Bianco per il Drawer per mantenere la leggibilità -->
+    <color name="footerBackgroundColor">#FFB74D</color> <!-- Arancione morbido per il footer, per dare un contrasto accattivante -->
+
+    <!-- Colori per il testo -->
+    <color name="primaryTextColor">#212121</color> <!-- Colore del testo principale (nero scuro) -->
+    <color name="secondaryTextColor">#757575</color> <!-- Colore del testo secondario (grigio scuro) -->
+
+    <!-- Colori di sfondo -->
+    <color name="background">#FFFFFF</color> <!-- Bianco per lo sfondo principale -->
+    <color name="cardBackground">#F1F8E9</color> <!-- Verde chiaro per il background delle card, per una sensazione naturale -->
+
+    <!-- Colori neutri per elementi comuni -->
+    <color name="black">#000000</color> <!-- Colore nero per il testo e icone -->
+    <color name="white">#FFFFFF</color> <!-- Colore bianco per il testo e sfondi -->>
+    <color name="gray">#E0E0E0</color>
+    <color name="red">#FF0000</color> <!-- Colore rosso -->
+    <color name="teal_700">#00796B</color>
+
+</resources>

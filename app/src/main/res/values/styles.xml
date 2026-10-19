@@ -1,0 +1,22 @@
+<resources>
+    <!-- Tema per la Toolbar -->
+    <style name="ToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:titleTextColor">@android:color/white</item>
+        <item name="android:textAppearance">@style/ToolbarTitleText</item>
+    </style>
+
+    <!-- Definizione dello stile per il testo del titolo -->
+    <style name="ToolbarTitleText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+    </style>
+
+    <!-- Titolo centrato -->
+    <style name="CenteredToolbarTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+</resources>

@@ -1,0 +1,105 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.shopfromhome">
+
+    <!-- Permesso per l'accesso a Internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ShopFromHome"
+        android:networkSecurityConfig="@xml/network_security_config">
+
+        <!-- MainActivity -->
+        <activity
+            android:name=".UI.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- LoginActivity -->
+        <activity
+            android:name=".UI.LoginActivity"
+            android:exported="true" />
+
+        <!-- RegisterActivity -->
+        <activity
+            android:name=".UI.RegisterActivity"
+            android:exported="true" />
+
+        <!-- ProductsActivity -->
+        <activity
+            android:name=".UI.ProductListActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <!-- CartActivity -->
+        <activity
+            android:name=".UI.CarrelloActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <!-- OrdersActivity -->
+        <activity
+            android:name=".UI.OrdersActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".UI.ProductDetailActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".UI.OrderDetailActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.HomepageGestoreActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.MagazzinoActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.CategorieActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.ModificaProdottoActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.AggiungiProdottoActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.OrdiniGestoreActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".gestore.DettaglioOrdineActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".UI.AccountActivity"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+    </application>
+</manifest>

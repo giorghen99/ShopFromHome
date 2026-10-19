@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/id_ordine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID: #12345"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/stato_ordine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stato: In Attesa"
+            android:textSize="14sp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/totale_prezzo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Totale: €50.00"
+            android:textSize="14sp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/data_ritiro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ritiro: 2025-02-01 14:00"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

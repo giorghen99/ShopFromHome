@@ -1,0 +1,40 @@
+
+# Android / Gradle
+*.iml
+.gradle/
+.idea/
+local.properties
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Java / Maven / Spring Boot
+target/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.ear
+
+# Log e file temporanei
+logs/
+*.log
+*.tmp
+
+# Sistemi operativi
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Configurazioni locali e segreti
+.env
+.env.*
+!.env.example
+
+# IDE e strumenti
+.vscode/
+
+# Documentazione PDF esclusa dal repository pubblico
+DERIVERABLES/*.pdf

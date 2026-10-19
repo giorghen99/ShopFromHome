@@ -1,0 +1,16 @@
+<resources>
+    <style name="Theme.ShopFromHome" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Colori principali -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Colore secondario -->
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorSecondaryVariant">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Sfondo finestra -->
+        <item name="android:windowBackground">@color/background</item>
+    </style>
+</resources>
