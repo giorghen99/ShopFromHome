@@ -87,7 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 // Log di successo e salvataggio sessione
-                Log.d("RegisterActivity", "Registrazione riuscita. Token ricevuto: " + response.getToken());
+                Log.d("RegisterActivity", "Registrazione riuscita.");
 
                 String authToken = response.getToken();
                 Long userId = response.getId(); // Ottieni l'ID dell'utente dalla risposta

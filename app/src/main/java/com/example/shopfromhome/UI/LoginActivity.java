@@ -151,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void saveSession(String email, String token, Long cartId, Long userId, String userRole, Utente utente) {
-        Log.d("SessionManager", "Sessione salvata per: " + email + ", UserID: " + userId + ", CartID: " + cartId + ", Role: " + userRole);
+        Log.d("SessionManager", "Sessione salvata correttamente.");
 
         SessionManager sessionManager = new SessionManager(this);
         sessionManager.saveSession(email, userRole, token, cartId, userId, utente);
@@ -167,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
 
             return jsonObject.optString("role", null);
         } catch (Exception e) {
-            Log.e("LoginActivity", "Errore nella decodifica del token JWT: " + e.getMessage());
+            Log.e("LoginActivity", "Errore nella decodifica del token JWT.");
             return null;
         }
     }
