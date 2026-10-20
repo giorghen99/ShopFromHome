@@ -171,7 +171,11 @@ private void completaLogin(
         String userRole,
         Utente utente
 ) {
-    saveSession(email, token, cartId, userId, userRole, utente);
+    Utente utenteSessione = new Utente();
+    utenteSessione.setEmail(email);
+    utenteSessione.setId(userId);
+
+    saveSession(email, token, cartId, userId, userRole, utenteSessione);
 
     Toast.makeText(
             LoginActivity.this,
@@ -183,7 +187,6 @@ private void completaLogin(
     startActivity(intent);
     finish();
 }
-
 
     private void saveSession(String email, String token, Long cartId, Long userId, String userRole, Utente utente) {
         Log.d("SessionManager", "Sessione salvata correttamente.");

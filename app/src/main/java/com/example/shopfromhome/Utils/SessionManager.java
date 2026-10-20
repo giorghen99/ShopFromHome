@@ -25,26 +25,34 @@ public class SessionManager {
         editor = sharedPreferences.edit();
     }
 
-    public void saveSession(String email, String role, String token, Long cartId, Long userId, Utente utente) {
-        editor.putString(KEY_EMAIL, email);
-        editor.putString(KEY_ROLE, role);
-        editor.putString(KEY_TOKEN, token);
-        if (cartId != null) {
-    editor.putLong(KEY_CART_ID, cartId);
-} else {
-    editor.remove(KEY_CART_ID);
-}
-        if (userId != null) {
-            editor.putLong(KEY_USER_ID, userId);
-        }
-        // Salva l'oggetto Utente come JSON
-        if (utente != null) {
-            Gson gson = new Gson();
-            String json = gson.toJson(utente);
-            editor.putString(KEY_USER, json);
-        }
-        editor.apply();
+public void saveSession(String email, String role, String token, Long cartId, Long userId, Utente utente) {
+    editor.putString(KEY_EMAIL, email);
+    editor.putString(KEY_ROLE, role);
+    editor.putString(KEY_TOKEN, token);
+
+    if (cartId != null) {
+        editor.putLong(KEY_CART_ID, cartId);
+    } else {
+        editor.remove(KEY_CART_ID);
     }
+
+    if (userId != null) {
+        editor.putLong(KEY_USER_ID, userId);
+    } else {
+        editor.remove(KEY_USER_ID);
+    }
+
+    if (utente != null) {
+        Gson gson = new Gson();
+        editor.putString(KEY_USER, gson.toJson(utente));
+    } else {
+        editor.remove(KEY_USER);
+    }
+
+    editor.apply();
+
+    Log.d("SessionManager", "Sessione salvata correttamente.");
+}
 
     public Utente getUtente() {
         String json = sharedPreferences.getString(KEY_USER, null);
