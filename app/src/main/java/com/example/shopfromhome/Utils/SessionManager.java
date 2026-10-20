@@ -30,8 +30,10 @@ public class SessionManager {
         editor.putString(KEY_ROLE, role);
         editor.putString(KEY_TOKEN, token);
         if (cartId != null) {
-            editor.putLong(KEY_CART_ID, cartId);
-        }
+    editor.putLong(KEY_CART_ID, cartId);
+} else {
+    editor.remove(KEY_CART_ID);
+}
         if (userId != null) {
             editor.putLong(KEY_USER_ID, userId);
         }

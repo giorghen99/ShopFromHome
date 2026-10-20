@@ -6,6 +6,8 @@ import com.example.backend_shopfromhome.Repository.UtenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.backend_shopfromhome.Model.Carrello;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,29 +17,43 @@ public class UtenteService {
 
     private final UtenteRepository utenteRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final CarrelloService carrelloService;
 
     @Autowired
-    public UtenteService(UtenteRepository utenteRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.utenteRepository = utenteRepository;
-        this.passwordEncoder = passwordEncoder;
+public UtenteService(
+        UtenteRepository utenteRepository,
+        BCryptPasswordEncoder passwordEncoder,
+        CarrelloService carrelloService
+) {
+    this.utenteRepository = utenteRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.carrelloService = carrelloService;
+}
+
+    
+@Transactional
+public Utente createUser(Utente utente) {
+utente.setRuolo(Ruolo.USER);
+    if (utente.getPassword() == null || utente.getPassword().isEmpty()) {
+        throw new IllegalArgumentException("La password è obbligatoria");
     }
 
-    public Utente createUser(Utente utente) {
-        if (utente.getPassword() == null || utente.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("La password è obbligatoria");
-        }
-
-        // Verifica se l'email esiste già nel database
-        Optional<Utente> existingUser = utenteRepository.findByEmail(utente.getEmail());
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("L'email è già associata a un altro account.");
-        }
-
-        String encryptedPassword = passwordEncoder.encode(utente.getPassword());
-        utente.setPassword(encryptedPassword);
-
-        return utenteRepository.save(utente);
+    Optional<Utente> existingUser = utenteRepository.findByEmail(utente.getEmail());
+    if (existingUser.isPresent()) {
+        throw new IllegalArgumentException("L'email è già associata a un altro account.");
     }
+
+    String encryptedPassword = passwordEncoder.encode(utente.getPassword());
+    utente.setPassword(encryptedPassword);
+
+    Utente createdUser = utenteRepository.save(utente);
+
+    String nomeCliente = createdUser.getNome() + " " + createdUser.getCognome();
+
+    carrelloService.creaCarrelloPerUtente(createdUser.getId(), nomeCliente);
+
+    return createdUser;
+}
 
 
     public Optional<Utente> findByEmail(String email) {

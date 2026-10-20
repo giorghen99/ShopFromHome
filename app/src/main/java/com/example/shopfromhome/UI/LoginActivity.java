@@ -113,42 +113,77 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void getCartForUser(Long userId, String token, String email, String userRole, Utente utente) {
-        ApiInterface apiInterface = ApiConfig.getRetrofit().create(ApiInterface.class);
-        Call<List<Carrello>> call = apiInterface.getCarrelliByUtente(userId, "Bearer " + token);
+    
+private void getCartForUser(
+        Long userId,
+        String token,
+        String email,
+        String userRole,
+        Utente utente
+) {
+    ApiInterface apiInterface =
+            ApiConfig.getRetrofit().create(ApiInterface.class);
 
-        call.enqueue(new Callback<List<Carrello>>() {
-            @Override
-            public void onResponse(Call<List<Carrello>> call, Response<List<Carrello>> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    Carrello carrello = response.body().get(0);
-                    Long cartId = carrello.getCarrelloId();
+    Call<List<Carrello>> call =
+            apiInterface.getCarrelliByUtente(userId, "Bearer " + token);
 
-                    Log.d("LoginActivity", "Carrello trovato. ID carrello: " + cartId);
+    call.enqueue(new Callback<List<Carrello>>() {
+        @Override
+        public void onResponse(
+                Call<List<Carrello>> call,
+                Response<List<Carrello>> response
+        ) {
+            Long cartId = null;
 
-                    if (cartId != null) {
-                        saveSession(email, token, cartId, userId, userRole, utente);
-                        Toast.makeText(LoginActivity.this, "Login riuscito!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.e("LoginActivity", "ID carrello nullo.");
-                        Toast.makeText(LoginActivity.this, "Errore: ID carrello nullo.", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.d("LoginActivity", "Nessun carrello trovato o risposta vuota.");
-                    Toast.makeText(LoginActivity.this, "Nessun carrello trovato per questo utente.", Toast.LENGTH_SHORT).show();
-                }
+            if (response.isSuccessful()
+                    && response.body() != null
+                    && !response.body().isEmpty()) {
+                Carrello carrello = response.body().get(0);
+                cartId = carrello.getCarrelloId();
+
+                Log.d("LoginActivity", "Carrello trovato. ID: " + cartId);
+            } else {
+                Log.w("LoginActivity",
+                        "Carrello non trovato o risposta non valida. Codice: "
+                                + response.code());
             }
 
-            @Override
-            public void onFailure(Call<List<Carrello>> call, Throwable t) {
-                Log.e("LoginActivity", "Errore durante il recupero del carrello: " + t.getMessage());
-                Toast.makeText(LoginActivity.this, "Errore durante il recupero del carrello: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+            completaLogin(cartId, email, token, userId, userRole, utente);
+        }
+
+        @Override
+        public void onFailure(Call<List<Carrello>> call, Throwable t) {
+            Log.e("LoginActivity",
+                    "Errore durante il recupero del carrello.", t);
+
+            // La sessione viene salvata anche se il carrello
+            // non è temporaneamente raggiungibile.
+            completaLogin(null, email, token, userId, userRole, utente);
+        }
+    });
+}
+
+private void completaLogin(
+        Long cartId,
+        String email,
+        String token,
+        Long userId,
+        String userRole,
+        Utente utente
+) {
+    saveSession(email, token, cartId, userId, userRole, utente);
+
+    Toast.makeText(
+            LoginActivity.this,
+            "Login riuscito!",
+            Toast.LENGTH_SHORT
+    ).show();
+
+    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+    startActivity(intent);
+    finish();
+}
+
 
     private void saveSession(String email, String token, Long cartId, Long userId, String userRole, Utente utente) {
         Log.d("SessionManager", "Sessione salvata correttamente.");

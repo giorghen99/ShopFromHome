@@ -10,6 +10,7 @@ import com.example.backend_shopfromhome.Repository.OrdineRepository;
 import com.example.backend_shopfromhome.Repository.ProdottoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,61 +28,71 @@ public class OrdineService {
         this.dettaglioOrdineRepository = dettaglioOrdineRepository;
         this.prodottoRepository = prodottoRepository;
     }
-
-    public Ordine salvaOrdine(Ordine ordine) {
-        System.out.println("Inizio salvataggio ordine");
-
-        if (ordine.getStato() == null) {
-            ordine.setStato(StatoOrdine.IN_LAVORAZIONE);  // Stato predefinito
-            System.out.println("Stato non fornito, impostato su IN_LAVORAZIONE");
-        }
-
-        // Valida l'ordine
-        if (ordine.getDettagliOrdine() == null || ordine.getDettagliOrdine().isEmpty()) {
-            System.out.println("Errore: l'ordine non contiene dettagli");
-            throw new RuntimeException("L'ordine deve contenere almeno un dettaglio");
-        }
-
-        // Salva l'ordine principale prima di gestire i dettagli
-        Ordine savedOrdine = ordineRepository.save(ordine);
-        System.out.println("Ordine salvato con ID: " + savedOrdine.getId());
-
-        // Calcola il totale dell'ordine e salva i dettagli
-        BigDecimal totaleOrdine = BigDecimal.ZERO;
-        for (DettaglioOrdine dettaglio : ordine.getDettagliOrdine()) {
-            Long prodottoId = dettaglio.getProdottoId();
-            System.out.println("Tentativo di recuperare prodotto con ID: " + prodottoId);
-
-            Prodotto prodotto = prodottoRepository.findById(prodottoId)
-                    .orElseThrow(() -> {
-                        System.out.println("Errore: prodotto non trovato con ID: " + prodottoId);
-                        return new RuntimeException("Prodotto non trovato: " + prodottoId);
-                    });
-
-            System.out.println("Prodotto trovato: " + prodotto.getNome());
-
-            // Aggiorna le quantità disponibili del prodotto
-            if (prodotto.getQuantitaDisponibile() < dettaglio.getQuantita()) {
-                throw new RuntimeException("Quantità insufficiente per il prodotto: " + prodotto.getNome());
-            }
-            prodotto.setQuantitaDisponibile(prodotto.getQuantitaDisponibile() - dettaglio.getQuantita());
-            prodottoRepository.save(prodotto);
-
-            // Calcola il prezzo totale per il dettaglio
-            dettaglio.calcolaPrezzoTotale(prodotto.getPrezzo());
-
-            // Associa l'ordine al dettaglio
-            dettaglio.setOrdine(savedOrdine); // Associa l'ordine salvato ai dettagli
-            dettaglioOrdineRepository.save(dettaglio);
-
-            totaleOrdine = totaleOrdine.add(dettaglio.getPrezzoTotale());
-        }
-
-        savedOrdine.setTotalePrezzo(totaleOrdine);
-        ordineRepository.save(savedOrdine);  // Riferimento all'ordine aggiornato con il totale
-
-        return savedOrdine;
+    
+@Transactional
+public Ordine salvaOrdine(Ordine ordine) {
+    if (ordine == null
+            || ordine.getUtente() == null
+            || ordine.getDettagliOrdine() == null
+            || ordine.getDettagliOrdine().isEmpty()) {
+        throw new IllegalArgumentException(
+                "L'ordine deve avere un utente e almeno un dettaglio."
+        );
     }
+
+    // Valida tutti i dettagli prima di modificare il database.
+    for (DettaglioOrdine dettaglio : ordine.getDettagliOrdine()) {
+        if (dettaglio == null
+                || dettaglio.getProdottoId() == null
+                || dettaglio.getQuantita() <= 0) {
+            throw new IllegalArgumentException(
+                    "Prodotto e quantità devono essere validi."
+            );
+        }
+
+        Prodotto prodotto = prodottoRepository
+        .findByIdForUpdate(dettaglio.getProdottoId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Prodotto non trovato."
+                ));
+
+        if (prodotto.getQuantitaDisponibile() < dettaglio.getQuantita()) {
+            throw new IllegalArgumentException(
+                    "Quantità non disponibile per il prodotto "
+                            + prodotto.getId()
+            );
+        }
+    }
+
+    ordine.setStato(StatoOrdine.IN_LAVORAZIONE);
+    ordine.setTotalePrezzo(BigDecimal.ZERO);
+
+    Ordine ordineSalvato = ordineRepository.save(ordine);
+    BigDecimal totaleOrdine = BigDecimal.ZERO;
+
+    for (DettaglioOrdine dettaglio : ordine.getDettagliOrdine()) {
+        Prodotto prodotto = prodottoRepository
+        .findByIdForUpdate(dettaglio.getProdottoId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Prodotto non trovato."
+                ));
+
+        prodotto.setQuantitaDisponibile(
+                prodotto.getQuantitaDisponibile() - dettaglio.getQuantita()
+        );
+        prodottoRepository.save(prodotto);
+
+        dettaglio.setOrdine(ordineSalvato);
+        dettaglio.calcolaPrezzoTotale(prodotto.getPrezzo());
+        dettaglioOrdineRepository.save(dettaglio);
+
+        totaleOrdine = totaleOrdine.add(dettaglio.getPrezzoTotale());
+    }
+
+    ordineSalvato.setTotalePrezzo(totaleOrdine);
+    return ordineRepository.save(ordineSalvato);
+}
+
 
     public Ordine updateOrderStatus(Long ordineId, StatoOrdine stato) {
         // Recupera l'ordine esistente
@@ -129,10 +140,43 @@ public class OrdineService {
         return ordineRepository.findAll();
     }
 
-    public void annullaOrdine(Long ordineId) {
-        Ordine ordine = ordineRepository.findById(ordineId)
-                .orElseThrow(() -> new RuntimeException("Ordine non trovato con ID: " + ordineId));
-        ordine.setStato(StatoOrdine.ANNULLATO);
-        ordineRepository.save(ordine);
+    
+
+@Transactional
+public void annullaOrdine(Long ordineId) {
+    Ordine ordine = ordineRepository.findById(ordineId)
+            .orElseThrow(() ->
+                    new RuntimeException("Ordine non trovato con ID: " + ordineId));
+
+    if (ordine.getStato() == StatoOrdine.ANNULLATO) {
+        throw new IllegalStateException("L'ordine è già annullato.");
     }
+
+    if (ordine.getStato() == StatoOrdine.RITIRATO) {
+        throw new IllegalStateException(
+                "Non è possibile annullare un ordine già ritirato."
+        );
+    }
+
+    List<DettaglioOrdine> dettagli =
+            dettaglioOrdineRepository.findByOrdine_Id(ordineId);
+
+    for (DettaglioOrdine dettaglio : dettagli) {
+        Prodotto prodotto = prodottoRepository
+                .findByIdForUpdate(dettaglio.getProdottoId())
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Prodotto non trovato: " + dettaglio.getProdottoId()
+                        ));
+
+        prodotto.setQuantitaDisponibile(
+                prodotto.getQuantitaDisponibile() + dettaglio.getQuantita()
+        );
+
+        prodottoRepository.save(prodotto);
+    }
+
+    ordine.setStato(StatoOrdine.ANNULLATO);
+    ordineRepository.save(ordine);
+  }
 }

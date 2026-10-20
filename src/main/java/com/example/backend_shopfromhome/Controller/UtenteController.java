@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -44,15 +46,47 @@ public class UtenteController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<Utente> getUserByEmail(@PathVariable String email) {
-        Optional<Utente> user = utenteService.findByEmail(email);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+public ResponseEntity<Utente> getUserByEmail(
+        @PathVariable String email,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @GetMapping("/ruolo/{ruolo}")
-    public List<Utente> getUtentiByRuolo(@PathVariable("ruolo") Ruolo ruolo) {
-        return utenteService.findByRuolo(ruolo);
+    boolean isMagazziniere = authentication.getAuthorities().contains(
+            new SimpleGrantedAuthority("ROLE_MAGAZZINIERE")
+    );
+
+    if (!isMagazziniere && !authentication.getName().equalsIgnoreCase(email)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+
+    Optional<Utente> user = utenteService.findByEmail(email);
+
+    return user.map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
+}
+
+    @GetMapping("/ruolo/{ruolo}")
+public ResponseEntity<List<Utente>> getUtentiByRuolo(
+        @PathVariable("ruolo") Ruolo ruolo,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    boolean isMagazziniere = authentication.getAuthorities().contains(
+            new SimpleGrantedAuthority("ROLE_MAGAZZINIERE")
+    );
+
+    if (!isMagazziniere) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    return ResponseEntity.ok(utenteService.findByRuolo(ruolo));
+}
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody Utente userInput) {

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -34,17 +35,20 @@ public class ProdottoController {
         return prodottoService.searchProducts(query);
     }
 
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @PostMapping
     public Prodotto createProduct(@RequestBody Prodotto prodotto) {
         System.out.println("Ricevuta richiesta per creare prodotto: " + prodotto.getNome()); // Aggiungi questo log
         return prodottoService.createProduct(prodotto);
     }
 
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @PutMapping("/{id}")
     public Prodotto updateProduct(@PathVariable Long id, @RequestBody Prodotto prodotto) {
         return prodottoService.updateProduct(id, prodotto);
     }
 
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         try {

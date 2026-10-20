@@ -1,12 +1,16 @@
 package com.example.backend_shopfromhome.Controller;
 
 import com.example.backend_shopfromhome.Model.Ordine;
+import com.example.backend_shopfromhome.Model.Utente;
+import com.example.backend_shopfromhome.Repository.UtenteRepository;
+import org.springframework.security.core.Authentication;
 import com.example.backend_shopfromhome.Model.StatoOrdine;
 import com.example.backend_shopfromhome.Service.OrdineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -14,12 +18,18 @@ import java.util.List;
 @RequestMapping("/api/ordini")
 public class OrdineController {
     private final OrdineService ordineService;
+    private final UtenteRepository utenteRepository;
 
     @Autowired
-    public OrdineController(OrdineService ordineService) {
-        this.ordineService = ordineService;
-    }
+	public OrdineController(
+        OrdineService ordineService,
+        UtenteRepository utenteRepository
+) {
+    this.ordineService = ordineService;
+    this.utenteRepository = utenteRepository;
+}
 
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @GetMapping
     public List<Ordine> getAllOrdini() {
         List<Ordine> ordini = ordineService.getAllOrdini();
@@ -37,22 +47,59 @@ public class OrdineController {
         return ordini;
     }
 
-    @PostMapping
-    public ResponseEntity<Ordine> creaOrdine(@RequestBody Ordine ordine) {
-        System.out.println("Creazione di un nuovo ordine: " + ordine);
-
-        // Non è più necessario calcolare il prezzo totale, viene preso direttamente dalla richiesta
-        ordine.getDettagliOrdine().forEach(dettaglio -> {
-            if (dettaglio.getProdottoId() == null) {
-                throw new RuntimeException("ID del prodotto mancante nel dettaglio ordine");
-            }
-        });
-
-        Ordine ordineCreato = ordineService.salvaOrdine(ordine);
-        System.out.println("Ordine creato con ID: " + ordineCreato.getId());
-        return ResponseEntity.ok(ordineCreato);
+    
+@PostMapping
+public ResponseEntity<Ordine> creaOrdine(
+        @RequestBody Ordine ordine,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    if (ordine.getDettagliOrdine() == null
+            || ordine.getDettagliOrdine().isEmpty()) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    boolean dettagliNonValidi = ordine.getDettagliOrdine().stream()
+            .anyMatch(dettaglio ->
+                    dettaglio.getProdottoId() == null
+                            || dettaglio.getQuantita() <= 0
+            );
+
+    if (dettagliNonValidi) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    Utente utente = utenteRepository.findByEmail(authentication.getName())
+            .orElse(null);
+
+    if (utente == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    // L'utente viene ricavato dal JWT, non dal corpo della richiesta.
+    ordine.setUtente(utente);
+
+    // Il backend calcolerà il totale usando i prezzi dei prodotti.
+    ordine.setTotalePrezzo(null);
+
+    // Il backend assegna lo stato iniziale.
+    ordine.setStato(com.example.backend_shopfromhome.Model.StatoOrdine.IN_LAVORAZIONE);
+
+    
+try {
+    Ordine ordineCreato = ordineService.salvaOrdine(ordine);
+    return ResponseEntity.status(HttpStatus.CREATED).body(ordineCreato);
+} catch (IllegalArgumentException e) {
+    return ResponseEntity.badRequest().build();
+} catch (org.springframework.dao.DataAccessException e) {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+}
+}
+
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @PatchMapping("/{ordineId}/stato")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Long ordineId, @RequestBody String stato) {
         System.out.println("Aggiornamento stato per ordine ID: " + ordineId + " a stato: " + stato);
@@ -86,6 +133,7 @@ public class OrdineController {
     }
 
     // Endpoint per ottenere ordini per stato
+    @PreAuthorize("hasRole('MAGAZZINIERE')")
     @GetMapping("/stato/{stato}")
     public List<Ordine> getOrdiniByStato(@PathVariable("stato") StatoOrdine stato) {
         System.out.println("Richiesta per ordini con stato: " + stato);
@@ -93,32 +141,124 @@ public class OrdineController {
     }
 
     // Endpoint per ottenere ordini per utente
-    @GetMapping("/utente/{utenteId}")
-    public List<Ordine> getOrdiniByUtente(@PathVariable("utenteId") Long utenteId) {
-        System.out.println("Richiesta per ordini dell'utente ID: " + utenteId);
-        return ordineService.findByUtenteId(utenteId);
+    
+@GetMapping("/utente/{utenteId}")
+public ResponseEntity<?> getOrdiniByUtente(
+        @PathVariable("utenteId") Long utenteId,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @GetMapping("/{ordineId}")
-    public ResponseEntity<Ordine> getOrdineById(@PathVariable Long ordineId) {
-        System.out.println("Richiesta per ordine ID: " + ordineId);
-        Ordine ordine = ordineService.getOrdineById(ordineId);
-        if (ordine != null) {
-            System.out.println("Ordine trovato: " + ordine);
-            return ResponseEntity.ok(ordine);
-        } else {
-            System.out.println("Ordine non trovato con ID: " + ordineId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    Utente utenteAutenticato = utenteRepository
+            .findByEmail(authentication.getName())
+            .orElse(null);
+
+    if (utenteAutenticato == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @PutMapping("/{ordineId}/annulla")
-    public ResponseEntity<Void> annullaOrdine(@PathVariable Long ordineId) {
-        try {
-            ordineService.annullaOrdine(ordineId);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    boolean isMagazziniere = authentication.getAuthorities().stream()
+            .anyMatch(authority ->
+                    authority.getAuthority().equals("ROLE_MAGAZZINIERE"));
+
+    if (!isMagazziniere && !utenteAutenticato.getId().equals(utenteId)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+
+    return ResponseEntity.ok(ordineService.findByUtenteId(utenteId));
+}
+
+
+    
+
+@GetMapping("/{ordineId}")
+public ResponseEntity<Ordine> getOrdineById(
+        @PathVariable Long ordineId,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    Utente utenteAutenticato = utenteRepository
+            .findByEmail(authentication.getName())
+            .orElse(null);
+
+    if (utenteAutenticato == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    Ordine ordine;
+    try {
+        ordine = ordineService.getOrdineById(ordineId);
+    } catch (RuntimeException e) {
+        return ResponseEntity.notFound().build();
+    }
+
+    if (ordine == null) {
+        return ResponseEntity.notFound().build();
+    }
+
+    boolean isMagazziniere = authentication.getAuthorities().stream()
+            .anyMatch(authority ->
+                    authority.getAuthority().equals("ROLE_MAGAZZINIERE"));
+
+    if (!isMagazziniere
+            && (ordine.getUtente() == null
+            || !utenteAutenticato.getId().equals(ordine.getUtente().getId()))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    return ResponseEntity.ok(ordine);
+}
+
+
+    
+@PutMapping("/{ordineId}/annulla")
+public ResponseEntity<?> annullaOrdine(
+        @PathVariable Long ordineId,
+        Authentication authentication
+) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    Utente utenteAutenticato = utenteRepository
+            .findByEmail(authentication.getName())
+            .orElse(null);
+
+    if (utenteAutenticato == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    Ordine ordine;
+    try {
+        ordine = ordineService.getOrdineById(ordineId);
+    } catch (RuntimeException e) {
+        return ResponseEntity.notFound().build();
+    }
+
+    boolean isMagazziniere = authentication.getAuthorities().stream()
+            .anyMatch(authority ->
+                    authority.getAuthority().equals("ROLE_MAGAZZINIERE"));
+
+    if (!isMagazziniere
+            && (ordine.getUtente() == null
+            || !utenteAutenticato.getId().equals(ordine.getUtente().getId()))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    try {
+        ordineService.annullaOrdine(ordineId);
+        return ResponseEntity.ok().build();
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(e.getMessage());
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Errore durante l'annullamento dell'ordine.");
+    }
+  }
 }

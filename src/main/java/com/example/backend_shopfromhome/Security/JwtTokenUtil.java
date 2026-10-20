@@ -42,6 +42,15 @@ public class JwtTokenUtil {
                 .getSubject();
     }
 
+    // Estrae il ruolo dal token JWT
+    public String getRoleFromToken(String token) {
+    return JWT.require(Algorithm.HMAC256(secretKey))
+               .build()
+               .verify(token)
+               .getClaim("role")
+               .asString();
+}
+
     // Verifica se il token è scaduto
     private boolean isTokenExpired(String token) {
         Date expiration = JWT.require(Algorithm.HMAC256(secretKey))
